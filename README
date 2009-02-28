@@ -5,6 +5,10 @@ Read about YQL at http://developer.yahoo.com/yql/
 Usage:
 
 % ./yql-shell
+> select title, url from search.web(10) where query="foo"
+
+You should see the top ten web search results for ‘foo’ in a pager.
+
 > select content from html where url="http://www.imdb.com/title/tt0813715/episodes" and xpath="//table//h3/a"
 
 You should see a dump of Heroes episode titles in a pager.
