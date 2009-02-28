@@ -4,6 +4,8 @@ Read about YQL at http://developer.yahoo.com/yql/
 
 USAGE:
 
+Interactive:
+
 % ./yql-shell
 > select title, url from search.web(10) where query="foo"
 
@@ -14,6 +16,20 @@ You should see the top ten web search results for ‘foo’ in a pager.
 You should see a dump of Heroes episode titles in a pager.
 
 Exit with ^D.
+
+Non-interactive:
+
+% ./yql-shell 'select title, url from search.web(10) where query="foo"'
+
+% echo 'select title, url from search.web(10) where query="foo"' >query
+% ./yql-shell <query
+
+To prevent yql-shell from launching a pager, redirect its output to a file or
+another program:
+
+% ./yql-shell '...' >output
+
+% ./yql-shell '...' | tail
 
 DEPENDENCIES:
 

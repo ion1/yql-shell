@@ -25,59 +25,105 @@ require 'json'
 require 'open-uri'
 require 'readline'
 
-def exec_or_die *args
-  begin
-    exec *args
-  rescue => e
-    $stderr.puts "Error running #{args.inspect}: #{e.class}: #{e}"
-  ensure
-    exit 1
-  end
-end
+class YQLShell
+  def initialize argv=ARGV
+    @pager = find_pager
 
-def find_pager
-  path = ENV['PATH'].split ':'
-
-  [
-    ENV['PAGER'], 'sensible-pager', 'pager', 'less', 'more', 'cat'
-  ].find do |file|
-    case file
-      when nil, "": false
-      when %r{^/}:  File.exists? file
-      else          path.any? {|dir| File.exists? File.join(dir, file) }
+    if argv.first
+      handle_yql argv.first
+    else
+      if $stdin.tty? and $stdout.tty?
+        main_loop
+      else
+        handle_yql $stdin.read
+      end
     end
   end
-end
 
-pager = find_pager
+  private
 
-loop do
-  yql = Readline.readline '> '
-  break if yql.nil?
-  Readline::HISTORY.push yql
+  def handle_yql expr
+    result = exec_yql expr
 
-  uri = 'http://query.yahooapis.com/v1/public/yql?q=' +
-        CGI.escape(yql) +
-        '&diagnostics=false&format=json'
-
-  begin
-    result = open(uri) {|io| JSON.parse io.read }
-
-    open '|-', 'w' do |io|
-      if io.nil?
-        # In child.
-        ENV['LESS'] = '-FRX'
-        exec_or_die pager, '-'
-      end
-
-      # In parent.
+    maybe_run_pager do |io|
       io.puts JSON.pretty_generate(result)
     end
-
-  rescue => e
-    $stderr.puts "Error: #{e.class}: #{e}"
   end
 
-  $stdout.puts
+  def main_loop
+    loop do
+      expr = Readline.readline '> '
+      break if expr.nil?
+      Readline::HISTORY.push expr
+
+      begin
+        handle_yql expr
+      rescue => e
+        $stderr.puts "Error: #{e.class}: #{e}"
+      end
+    end
+  end
+
+  def exec_yql expr
+    uri = 'http://query.yahooapis.com/v1/public/yql?q=' +
+          CGI.escape(expr) +
+          '&diagnostics=false&format=json'
+
+    open(uri) {|io| JSON.parse io.read }
+  end
+
+  # If standard output is a TTY, launch a pager and run the given block with a
+  # pipe to the pager as a parameter. Otherwise run the block with standard
+  # output as a parameter.
+  def maybe_run_pager
+    if $stdout.tty?
+      open '|-', 'w' do |io|
+        if io.nil?
+          # In child.
+          ENV['LESS'] = '-FRX'
+          exec_or_die @pager, '-'
+        end
+
+        # In parent.
+        yield io
+      end
+
+    else
+      yield $stdout
+    end
+  end
+
+  def exec_or_die *args
+    begin
+      exec *args
+    rescue => e
+      $stderr.puts "Error running #{args.inspect}: #{e.class}: #{e}"
+    ensure
+      exit 1
+    end
+  end
+
+  def find_pager
+    path = ENV['PATH'].split ':'
+
+    [
+      ENV['PAGER'], 'sensible-pager', 'pager', 'less', 'more', 'cat'
+    ].find do |file|
+      case file
+        when nil, "": false
+        when %r{^/}:  File.exists? file
+        else          path.any? {|dir| File.exists? File.join(dir, file) }
+      end
+    end
+  end
+end
+
+if $0 == __FILE__
+  begin
+    YQLShell.new
+  rescue => e
+    $stderr.puts "Error: #{e.class}: #{e}"
+    exit 1
+  end
 end
 
