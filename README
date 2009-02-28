@@ -1,4 +1,4 @@
-yql-shell: A quick and dirty “shell” for developing YQL expressions.
+yql-shell: A quick and dirty “shell” for testing YQL expressions.
 
 Read about YQL at http://developer.yahoo.com/yql/
 
