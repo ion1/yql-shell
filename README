@@ -1,0 +1,11 @@
+yql-shell: A quick and dirty “shell” for developing YQL expressions.
+
+Usage:
+
+% ./yql-shell
+> select content from html where url="http://www.imdb.com/title/tt0813715/episodes" and xpath="//table//h3/a"
+
+You should see a dump of Heroes episode titles in a pager.
+
+Exit with ^D.
+
