@@ -1,5 +1,7 @@
 yql-shell: A quick and dirty “shell” for developing YQL expressions.
 
+Read about YQL at http://developer.yahoo.com/yql/
+
 Usage:
 
 % ./yql-shell
