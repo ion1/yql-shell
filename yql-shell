@@ -23,7 +23,6 @@ end
 require 'cgi'
 require 'json'
 require 'open-uri'
-require 'pp'
 require 'readline'
 
 def exec_or_die *args
@@ -55,7 +54,7 @@ loop do
       end
 
       # In parent.
-      io.puts result.pretty_inspect
+      io.puts JSON.pretty_generate(result)
     end
 
   rescue => e
