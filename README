@@ -2,7 +2,7 @@ yql-shell: A quick and dirty “shell” for testing YQL expressions.
 
 Read about YQL at http://developer.yahoo.com/yql/
 
-Usage:
+USAGE:
 
 % ./yql-shell
 > select title, url from search.web(10) where query="foo"
@@ -14,4 +14,10 @@ You should see the top ten web search results for ‘foo’ in a pager.
 You should see a dump of Heroes episode titles in a pager.
 
 Exit with ^D.
+
+DEPENDENCIES:
+
+Ruby 1.8 and the JSON library for Ruby
+OR
+Ruby 1.9
 
