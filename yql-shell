@@ -35,6 +35,22 @@ def exec_or_die *args
   end
 end
 
+def find_pager
+  path = ENV['PATH'].split ':'
+
+  [
+    ENV['PAGER'], 'sensible-pager', 'pager', 'less', 'more', 'cat'
+  ].find do |file|
+    case file
+      when nil, "": false
+      when %r{^/}:  File.exists? file
+      else          path.any? {|dir| File.exists? File.join(dir, file) }
+    end
+  end
+end
+
+pager = find_pager
+
 loop do
   yql = Readline.readline '> '
   break if yql.nil?
@@ -50,7 +66,8 @@ loop do
     open '|-', 'w' do |io|
       if io.nil?
         # In child.
-        exec_or_die 'pager', '-'
+        ENV['LESS'] = '-FRX'
+        exec_or_die pager, '-'
       end
 
       # In parent.
