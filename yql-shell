@@ -95,7 +95,7 @@ class YQLShell
 
   def exec_or_die *args
     begin
-      exec *args
+      exec(*args)
     rescue => e
       $stderr.puts "Error running #{args.inspect}: #{e.class}: #{e}"
     ensure
